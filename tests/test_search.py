@@ -11,7 +11,7 @@ def test_bfs_finds_shortest_path():
 
     result = bfs(graph, "a.bsky.social", "d.bsky.social")
 
-    assert result == ["a.bsky.social", "b.bsky.social", "d.bsky.social"]
+    assert result == {"path": ["a.bsky.social", "b.bsky.social", "d.bsky.social"], "distance": 2}
 
 
 def test_bfs_returns_none_when_path_does_not_exist():

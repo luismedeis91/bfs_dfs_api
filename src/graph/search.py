@@ -10,7 +10,7 @@ def bfs(graph, start, target):
         current_user = path[-1]
 
         if current_user == target:
-            return path
+            return {"path": path, "distance": len(path) - 1}
 
         if current_user not in visited:
             visited.add(current_user)
@@ -34,3 +34,34 @@ def dfs(graph, start, visited=None):
             dfs(graph, neighbor, visited)
 
     return visited
+
+
+def find_farthest_pair_bfs(graph):
+    if not graph:
+        return None
+
+    # Get all users (both keys and values)
+    users = set(graph.keys())
+    for follows in graph.values():
+        users.update(follows)
+    users = list(users)
+
+    farthest_pair = None
+    max_distance = 0
+
+    for start_user in users:
+        for end_user in users:
+            if start_user == end_user:
+                continue
+
+            result = bfs(graph, start_user, end_user)
+            if result and result["distance"] > max_distance:
+                max_distance = result["distance"]
+                farthest_pair = {
+                    "user1": start_user,
+                    "user2": end_user,
+                    "path": result["path"],
+                    "distance": result["distance"]
+                }
+
+    return farthest_pair
