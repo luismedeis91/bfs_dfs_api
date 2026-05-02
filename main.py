@@ -3,6 +3,7 @@ import os
 from src.api.bluesky_api import login
 from src.graph.graph_builder import build_graph
 from src.graph.search import bfs, find_farthest_pair_bfs
+from src.graph.visualize import visualize_graph
 
 def main():
     logged_in = login()
@@ -14,7 +15,7 @@ def main():
     start_user = "rubysecond.bsky.social"
     target_user = "bsky.app"
 
-    print(f"Building graph starting from {start_user} to {target_user}...")
+    print(f"Building graph starting from {start_user} to {target_user}:")
     graph = build_graph(start_user, depth=2, limit=5)
 
     print(f"Graph size: {len(graph)} users")
@@ -36,6 +37,11 @@ def main():
         print(f"Path: {' -> '.join(farthest['path'])}")
     else:
         print("\nNo connected pairs found in the graph.")
+
+    # Visualize the graph
+    print("\nGenerating graph visualization:")
+    path_to_highlight = result['path'] if result else None
+    visualize_graph(graph, path=path_to_highlight, title=f"Bluesky Network: {start_user}")
 
 if __name__ == "__main__":
     main()
