@@ -5,18 +5,17 @@ from src.graph.graph_builder import build_graph
 from src.graph.search import bfs
 
 def main():
-    # Attempt to login using environment variables
     logged_in = login()
     if not logged_in:
         print("Warning: Running without authentication. Results might be empty.")
     else:
         print("Logged in successfully.")
 
-    start_user = "jay.bsky.social"
-    target_user = "pfrazee.com" # Just an example
+    start_user = "rubysecond.bsky.social"
+    target_user = "bsky.app"
 
     print(f"Building graph starting from {start_user}...")
-    graph = build_graph(start_user, depth=1, limit=5)
+    graph = build_graph(start_user, depth=2, limit=5)
     
     print(f"Graph size: {len(graph)} users")
     
