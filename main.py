@@ -1,47 +1,38 @@
-import sys
-import os
-from src.api.bluesky_api import login
-from src.graph.graph_builder import build_graph
-from src.graph.search import bfs, find_farthest_pair_bfs
-from src.graph.visualize import visualize_graph
+from src.graph.search import dfs_with_stack, is_network_connected
+
+
+CONNECTED_NETWORK = {
+    "R1": ["R2", "R3"],
+    "R2": ["R1", "R4"],
+    "R3": ["R1", "R5"],
+    "R4": ["R2", "R5"],
+    "R5": ["R3", "R4"]
+}
+
+
+DISCONNECTED_NETWORK = {
+    "R1": ["R2"],
+    "R2": ["R1", "R3"],
+    "R3": ["R2"],
+    "R4": ["R5"],
+    "R5": ["R4"]
+}
+
+
+def analyze_network(network, central_router, name):
+    visited = dfs_with_stack(network, central_router)
+    connected = is_network_connected(network, central_router)
+
+    print(name)
+    print(f"Roteador central: {central_router}")
+    print(f"Roteadores visitados: {sorted(visited)}")
+    print(f"Todos os roteadores foram visitados? {visited == set(network.keys())}")
+    print(f"Rede conectada? {connected}")
+    print()
 
 def main():
-    logged_in = login()
-    if not logged_in:
-        print("Warning: Running without authentication. Results might be empty.")
-    else:
-        print("Logged in successfully.")
-
-    start_user = "rubysecond.bsky.social"
-    target_user = "bsky.app"
-
-    print(f"Building graph starting from {start_user} to {target_user}:")
-    graph = build_graph(start_user, depth=2, limit=5)
-
-    print(f"Graph size: {len(graph)} users")
-    
-    result = bfs(graph, start_user, target_user)
-    if result:
-        print(f"Path found: {' -> '.join(result['path'])}")
-        print(f"Distance: {result['distance']} connections")
-    else:
-        print(f"No path found between {start_user} and {target_user} within depth.")
-
-    print("\nSearching two most distant users in the graph")
-    farthest = find_farthest_pair_bfs(graph)
-    if farthest:
-        print(f"\nMost distant users:")
-        print(f"From: {farthest['user1']}")
-        print(f"To: {farthest['user2']}")
-        print(f"Distance: {farthest['distance']} connections")
-        print(f"Path: {' -> '.join(farthest['path'])}")
-    else:
-        print("\nNo connected pairs found in the graph.")
-
-    # Visualize the graph
-    print("\nGenerating graph visualization:")
-    path_to_highlight = result['path'] if result else None
-    visualize_graph(graph, path=path_to_highlight, title=f"Bluesky Network: {start_user}")
+    analyze_network(CONNECTED_NETWORK, "R1", "Caso 1 - Rede conectada")
+    analyze_network(DISCONNECTED_NETWORK, "R1", "Caso 2 - Rede desconectada")
 
 if __name__ == "__main__":
     main()

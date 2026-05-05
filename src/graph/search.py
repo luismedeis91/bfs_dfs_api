@@ -36,11 +36,41 @@ def dfs(graph, start, visited=None):
     return visited
 
 
+def dfs_with_stack(graph, start):
+    visited = set()
+    stack = [start]
+
+    while stack:
+        current_router = stack.pop()
+
+        if current_router in visited:
+            continue
+
+        visited.add(current_router)
+
+        for neighbor in reversed(graph.get(current_router, [])):
+            if neighbor not in visited:
+                stack.append(neighbor)
+
+    return visited
+
+
+def is_network_connected(graph, central_router):
+    all_routers = set(graph.keys())
+    for neighbors in graph.values():
+        all_routers.update(neighbors)
+
+    if not all_routers:
+        return False
+
+    visited = dfs_with_stack(graph, central_router)
+    return visited == all_routers
+
+
 def find_farthest_pair_bfs(graph):
     if not graph:
         return None
 
-    # Get all users (both keys and values)
     users = set(graph.keys())
     for follows in graph.values():
         users.update(follows)
