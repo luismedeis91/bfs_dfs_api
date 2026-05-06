@@ -369,10 +369,18 @@ def _build_summary_panel(name, analysis):
     summary.add_column(style=WHITE)
     summary.add_row("Teste", analysis["scenario_label"] or name)
     summary.add_row("Central", analysis["central_router"])
+    if analysis.get("objective"):
+        summary.add_row("Objetivo", analysis["objective"])
+    if analysis.get("context", {}).get("city"):
+        summary.add_row("Cidade", analysis["context"]["city"])
     if expected is not None:
         summary.add_row("Esperado", expected)
     summary.add_row("Resultado", actual)
     summary.add_row("Status", status_text)
+    if analysis.get("incident", {}).get("date"):
+        summary.add_row("Incidente", analysis["incident"]["date"])
+    if analysis.get("incident", {}).get("status"):
+        summary.add_row("Estado do incidente", analysis["incident"]["status"])
     summary.add_row("Ordem final", " -> ".join(analysis["visit_order"]))
     summary.add_row("Visitados", ", ".join(sorted(analysis["visited"])))
     summary.add_row(
@@ -395,6 +403,50 @@ def _build_summary_panel(name, analysis):
     )
 
 
+def _build_risk_monitor_panel(analysis):
+    monitor = analysis.get("neighborhood_monitor", [])
+    table = Table(box=None, expand=True, pad_edge=False)
+    table.add_column("Bairro", style=f"bold {WHITE}")
+    table.add_column("Cobertura", style=WHITE)
+    table.add_column("Risco medio", style=WHITE)
+    table.add_column("Status", style=WHITE)
+
+    for item in monitor[:6]:
+        if item["status"] == "critico":
+            color = DANGER
+            status = "critico"
+        elif item["status"] == "monitorar":
+            color = WARNING
+            status = "monitorar"
+        else:
+            color = SUCCESS
+            status = "estavel"
+        table.add_row(
+            item["neighborhood"],
+            f"{item['visited']}/{len(item['routers'])} ({item['coverage_pct']}%)",
+            str(item["avg_risk"]),
+            Text(status, style=f"bold {color}"),
+        )
+
+    focus = ", ".join(analysis.get("monitoring_focus", [])) or "nenhum"
+    summary = Group(
+        Text(analysis.get("executive_summary", ""), style=f"bold {WHITE}"),
+        Text(""),
+        table,
+        Text(""),
+        Text(f"Foco recomendado: {focus}", style=f"bold {ACCENT_SOFT}"),
+    )
+
+    return Panel(
+        summary,
+        title=f"[bold {WHITE}]Monitor de Bairros Vulneraveis[/bold {WHITE}]",
+        border_style=WARNING,
+        box=box.ROUNDED,
+        style=f"on {SURFACE}",
+        padding=(1, 2),
+    )
+
+
 def _build_compact_result_panel(analysis):
     status_color = SUCCESS if analysis["passed"] else DANGER
     status_text = "PASSOU" if analysis["passed"] else "FALHOU"
@@ -408,6 +460,11 @@ def _build_compact_result_panel(analysis):
     body.add_row("Resultado", actual)
     body.add_row("Status", status_text)
     body.add_row("Visitados", f"{len(analysis['visited'])}/{analysis['total_routers']}")
+    if analysis.get("risk_alerts"):
+        body.add_row(
+            "Alertas",
+            ", ".join(item["neighborhood"] for item in analysis["risk_alerts"]),
+        )
 
     return Panel(
         body,
@@ -423,7 +480,7 @@ def render_compact_results(analyses):
     _require_rich()
     console = Console()
     console.print(Rule(style=ACCENT))
-    console.print(Align.center(Text("Resumo dos 2 Testes", style=f"bold {WHITE}")))
+    console.print(Align.center(Text(f"Resumo dos {len(analyses)} Cenarios", style=f"bold {WHITE}")))
     console.print("")
 
     for analysis in analyses:
@@ -617,6 +674,7 @@ def render_router_analysis(name, graph, analysis, step_delay=0.18, show_intro=Tr
         final_group = Group(
             _build_dashboard(name, graph, analysis, trace[-1], "FINAL", len(trace) - 1, progress, width),
             _build_summary_panel(name, analysis),
+            _build_risk_monitor_panel(analysis),
         )
         live.update(final_group)
 
@@ -624,12 +682,30 @@ def render_router_analysis(name, graph, analysis, step_delay=0.18, show_intro=Tr
 def print_plain_analysis(name, analysis):
     print(f"Teste: {analysis['scenario_label'] or name}")
     print(f"Roteador central: {analysis['central_router']}")
+    if analysis.get("context", {}).get("city"):
+        print(f"Cidade: {analysis['context']['city']}")
+    if analysis.get("objective"):
+        print(f"Objetivo: {analysis['objective']}")
     if analysis["expected_connected"] is not None:
         expected = "True" if analysis["expected_connected"] else "False"
         print(f"Esperado conectado?: {expected}")
     print(f"Resultado conectado?: {analysis['connected']}")
     print(f"Status do teste: {'PASSOU' if analysis['passed'] else 'FALHOU'}")
+    if analysis.get("incident", {}).get("date"):
+        print(f"Data do incidente: {analysis['incident']['date']}")
+    if analysis.get("incident", {}).get("details"):
+        print(f"Incidente: {analysis['incident']['details']}")
+    if analysis.get("recovery", {}).get("planned_action"):
+        print(f"Plano de resposta: {analysis['recovery']['planned_action']}")
+    print(f"Resumo executivo: {analysis.get('executive_summary', '-')}")
     print(f"Ordem de visita: {' -> '.join(analysis['visit_order'])}")
     print(f"Roteadores visitados: {sorted(analysis['visited'])}")
     print(f"Todos os roteadores foram visitados? {analysis['all_visited']}")
+    if analysis.get("neighborhood_monitor"):
+        print("Monitor de bairros vulneraveis:")
+        for item in analysis["neighborhood_monitor"][:5]:
+            print(
+                f"  - {item['neighborhood']}: cobertura {item['visited']}/{len(item['routers'])} "
+                f"| risco {item['avg_risk']} | status {item['status']}"
+            )
     print()

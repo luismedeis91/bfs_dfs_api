@@ -1,28 +1,129 @@
 {
-  "connected_network": {
-    "label": "Teste 1 - Rede conectada",
+  "preventive_monitoring_success": {
+    "label": "Cenario 1 - DFS mantem Fortaleza conectada",
     "expected_connected": true,
-    "central_router": "R1",
+    "central_router": "NOC-CENTRO",
+    "objective": "Mostrar que a DFS valida a cobertura da malha antes de um incidente virar apagao.",
+    "context": {
+      "city": "Fortaleza",
+      "story": "A central no Centro redistribui trafego para bairros sensiveis e confirma redundancia operacional."
+    },
+    "incident": {
+      "type": "monitoramento_preventivo",
+      "status": "sem_interrupcao",
+      "date": "2026-05-06",
+      "details": "A malha permaneceu conectada mesmo com foco em bairros com maior historico de risco."
+    },
+    "monitoring_focus": [
+      "Pirambu",
+      "Barra do Ceara",
+      "Jangurussu"
+    ],
+    "router_profiles": {
+      "NOC-CENTRO": {"neighborhood": "Centro", "risk_score": 4, "criticality": "alta"},
+      "EDGE-ALDEOTA": {"neighborhood": "Aldeota", "risk_score": 3, "criticality": "alta"},
+      "EDGE-MEIRELES": {"neighborhood": "Meireles", "risk_score": 3, "criticality": "media"},
+      "EDGE-PAPICU": {"neighborhood": "Papicu", "risk_score": 5, "criticality": "alta"},
+      "EDGE-MUCURIPE": {"neighborhood": "Mucuripe", "risk_score": 4, "criticality": "media"},
+      "EDGE-COCO": {"neighborhood": "Coco", "risk_score": 4, "criticality": "media"},
+      "EDGE-PIRAMBU": {"neighborhood": "Pirambu", "risk_score": 8, "criticality": "alta"}
+    },
     "network": {
-      "R1": ["R2", "R3"],
-      "R2": ["R1", "R4", "R5"],
-      "R3": ["R1", "R6"],
-      "R4": ["R2"],
-      "R5": ["R2", "R6"],
-      "R6": ["R3", "R5"]
+      "NOC-CENTRO": ["EDGE-ALDEOTA", "EDGE-PAPICU"],
+      "EDGE-ALDEOTA": ["NOC-CENTRO", "EDGE-MEIRELES", "EDGE-COCO"],
+      "EDGE-MEIRELES": ["EDGE-ALDEOTA", "EDGE-MUCURIPE"],
+      "EDGE-PAPICU": ["NOC-CENTRO", "EDGE-MUCURIPE", "EDGE-PIRAMBU"],
+      "EDGE-MUCURIPE": ["EDGE-MEIRELES", "EDGE-PAPICU"],
+      "EDGE-COCO": ["EDGE-ALDEOTA"],
+      "EDGE-PIRAMBU": ["EDGE-PAPICU"]
     }
   },
-  "disconnected_network": {
-    "label": "Teste 2 - Rede desconectada",
+  "fiber_theft_outage": {
+    "label": "Cenario 2 - Roubo de fibra derruba bairros vulneraveis",
     "expected_connected": false,
-    "central_router": "R1",
+    "central_router": "NOC-CENTRO",
+    "objective": "Mostrar que a DFS identifica rapidamente quais bairros perderam cobertura apos o rompimento.",
+    "context": {
+      "city": "Fortaleza",
+      "story": "Em 2025-08-14, um roubo de fibra isola a zona sul e parte da periferia da malha principal."
+    },
+    "incident": {
+      "type": "roubo_de_fibra",
+      "status": "interrupcao_ativa",
+      "date": "2025-08-14",
+      "details": "O enlace entre Papicu e Jangurussu foi comprometido e a DFS detectou bairros sem rota ate a central."
+    },
+    "monitoring_focus": [
+      "Jangurussu",
+      "Ancuri",
+      "Messejana"
+    ],
+    "router_profiles": {
+      "NOC-CENTRO": {"neighborhood": "Centro", "risk_score": 4, "criticality": "alta"},
+      "EDGE-ALDEOTA": {"neighborhood": "Aldeota", "risk_score": 3, "criticality": "alta"},
+      "EDGE-PAPICU": {"neighborhood": "Papicu", "risk_score": 5, "criticality": "alta"},
+      "EDGE-MESSEJANA": {"neighborhood": "Messejana", "risk_score": 7, "criticality": "alta"},
+      "EDGE-JANGURUSSU": {"neighborhood": "Jangurussu", "risk_score": 9, "criticality": "alta"},
+      "EDGE-ANCURI": {"neighborhood": "Ancuri", "risk_score": 8, "criticality": "media"},
+      "EDGE-PIRAMBU": {"neighborhood": "Pirambu", "risk_score": 8, "criticality": "alta"}
+    },
     "network": {
-      "R1": ["R2"],
-      "R2": ["R1", "R3"],
-      "R3": ["R2"],
-      "R4": ["R5"],
-      "R5": ["R4", "R6"],
-      "R6": ["R5"]
+      "NOC-CENTRO": ["EDGE-ALDEOTA", "EDGE-PAPICU", "EDGE-PIRAMBU"],
+      "EDGE-ALDEOTA": ["NOC-CENTRO"],
+      "EDGE-PAPICU": ["NOC-CENTRO"],
+      "EDGE-PIRAMBU": ["NOC-CENTRO"],
+      "EDGE-MESSEJANA": ["EDGE-JANGURUSSU"],
+      "EDGE-JANGURUSSU": ["EDGE-MESSEJANA", "EDGE-ANCURI"],
+      "EDGE-ANCURI": ["EDGE-JANGURUSSU"]
+    },
+    "recovery": {
+      "status": "aguardando_reparo",
+      "planned_action": "Restaurar o enlace Papicu-Jangurussu com rota redundante.",
+      "eta": "2025-08-15"
+    }
+  },
+  "fiber_theft_recovered": {
+    "label": "Cenario 3 - Reparo restabelece a malha apos o roubo",
+    "expected_connected": true,
+    "central_router": "NOC-CENTRO",
+    "objective": "Mostrar a volta da conectividade apos o reparo e a necessidade de monitorar bairros reincidentes.",
+    "context": {
+      "city": "Fortaleza",
+      "story": "Em 2025-08-15, a operacao de campo recompone a fibra e adiciona um caminho alternativo para a zona sul."
+    },
+    "incident": {
+      "type": "roubo_de_fibra",
+      "status": "corrigido",
+      "date": "2025-08-15",
+      "details": "A equipe recuperou a malha e criou redundancia entre Papicu, Messejana e Jangurussu."
+    },
+    "monitoring_focus": [
+      "Jangurussu",
+      "Ancuri",
+      "Messejana"
+    ],
+    "router_profiles": {
+      "NOC-CENTRO": {"neighborhood": "Centro", "risk_score": 4, "criticality": "alta"},
+      "EDGE-ALDEOTA": {"neighborhood": "Aldeota", "risk_score": 3, "criticality": "alta"},
+      "EDGE-PAPICU": {"neighborhood": "Papicu", "risk_score": 5, "criticality": "alta"},
+      "EDGE-MESSEJANA": {"neighborhood": "Messejana", "risk_score": 7, "criticality": "alta"},
+      "EDGE-JANGURUSSU": {"neighborhood": "Jangurussu", "risk_score": 9, "criticality": "alta"},
+      "EDGE-ANCURI": {"neighborhood": "Ancuri", "risk_score": 8, "criticality": "media"},
+      "EDGE-PIRAMBU": {"neighborhood": "Pirambu", "risk_score": 8, "criticality": "alta"}
+    },
+    "network": {
+      "NOC-CENTRO": ["EDGE-ALDEOTA", "EDGE-PAPICU", "EDGE-PIRAMBU"],
+      "EDGE-ALDEOTA": ["NOC-CENTRO"],
+      "EDGE-PAPICU": ["NOC-CENTRO", "EDGE-MESSEJANA", "EDGE-JANGURUSSU"],
+      "EDGE-PIRAMBU": ["NOC-CENTRO"],
+      "EDGE-MESSEJANA": ["EDGE-PAPICU", "EDGE-JANGURUSSU"],
+      "EDGE-JANGURUSSU": ["EDGE-MESSEJANA", "EDGE-ANCURI", "EDGE-PAPICU"],
+      "EDGE-ANCURI": ["EDGE-JANGURUSSU"]
+    },
+    "recovery": {
+      "status": "reparo_concluido",
+      "planned_action": "Manter dupla rota monitorada na zona sul.",
+      "completed_at": "2025-08-15"
     }
   }
 }

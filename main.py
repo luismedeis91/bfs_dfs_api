@@ -92,6 +92,7 @@ def main():
             central_router,
             expected_connected=scenario.get("expected_connected"),
             scenario_label=scenario.get("label", name),
+            scenario_metadata=scenario,
         )
         analyses.append((scenario, analysis))
 
@@ -102,7 +103,7 @@ def main():
 
     if len(analyses) > 1:
         if not args.no_intro:
-            render_hacker_intro(title="DFS ROUTER STACK :: 2 TESTES")
+            render_hacker_intro(title=f"DFS ROUTER STACK :: {len(analyses)} CENARIOS")
 
         for scenario, analysis in analyses:
             label = analysis["scenario_label"] or "Teste"

@@ -13,33 +13,53 @@ DATA_FILE = Path(__file__).resolve().parents[1] / "data" / "router_networks.json
 def test_load_router_scenarios_reads_external_file():
     scenarios = load_router_scenarios(DATA_FILE)
 
-    assert "connected_network" in scenarios
-    assert "disconnected_network" in scenarios
-    assert scenarios["connected_network"]["central_router"] == "R1"
+    assert "preventive_monitoring_success" in scenarios
+    assert "fiber_theft_outage" in scenarios
+    assert scenarios["preventive_monitoring_success"]["central_router"] == "NOC-CENTRO"
 
 
 def test_analyze_router_network_reports_connected_scenario():
     scenarios = load_router_scenarios(DATA_FILE)
-    scenario = scenarios["connected_network"]
+    scenario = scenarios["preventive_monitoring_success"]
 
-    analysis = analyze_router_network(scenario["network"], scenario["central_router"])
+    analysis = analyze_router_network(
+        scenario["network"],
+        scenario["central_router"],
+        scenario_metadata=scenario,
+    )
 
     assert analysis["all_visited"] is True
     assert analysis["connected"] is True
     assert analysis["passed"] is True
-    assert analysis["visit_order"] == ["R1", "R2", "R4", "R5", "R6", "R3"]
+    assert analysis["visit_order"] == [
+        "NOC-CENTRO",
+        "EDGE-ALDEOTA",
+        "EDGE-MEIRELES",
+        "EDGE-MUCURIPE",
+        "EDGE-PAPICU",
+        "EDGE-PIRAMBU",
+        "EDGE-COCO",
+    ]
+    assert analysis["executive_summary"].startswith("A DFS confirmou")
+    assert analysis["risk_alerts"][0]["neighborhood"] == "Pirambu"
 
 
 def test_analyze_router_network_reports_disconnected_scenario():
     scenarios = load_router_scenarios(DATA_FILE)
-    scenario = scenarios["disconnected_network"]
+    scenario = scenarios["fiber_theft_outage"]
 
-    analysis = analyze_router_network(scenario["network"], scenario["central_router"])
+    analysis = analyze_router_network(
+        scenario["network"],
+        scenario["central_router"],
+        scenario_metadata=scenario,
+    )
 
     assert analysis["all_visited"] is False
     assert analysis["connected"] is False
     assert analysis["passed"] is True
-    assert analysis["visited"] == {"R1", "R2", "R3"}
+    assert analysis["visited"] == {"NOC-CENTRO", "EDGE-ALDEOTA", "EDGE-PAPICU", "EDGE-PIRAMBU"}
+    assert analysis["risk_alerts"][0]["neighborhood"] == "Jangurussu"
+    assert analysis["executive_summary"].startswith("A DFS identificou perda de cobertura")
 
 
 def test_build_visit_trace_tracks_stack_and_skips_repeated_nodes():
