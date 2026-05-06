@@ -1,0 +1,10 @@
+# instalar tudo
+python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+
+# rodar
+source .venv/bin/activate && python main.py
+source .venv/bin/activate && python main.py --scenario connected_network
+source .venv/bin/activate && python main.py --scenario disconnected_network
+
+# testar
+source .venv/bin/activate && pytest -q

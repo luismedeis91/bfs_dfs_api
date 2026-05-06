@@ -1,38 +1,132 @@
-from src.graph.search import dfs_with_stack, is_network_connected
+import argparse
+import os
+from pathlib import Path
+import sys
+
+from src.services.router_networks import analyze_router_network, load_router_scenarios
+from src.services.router_terminal import (
+    RICH_AVAILABLE,
+    print_plain_analysis,
+    render_compact_results,
+    render_hacker_intro,
+    render_router_analysis,
+)
 
 
-CONNECTED_NETWORK = {
-    "R1": ["R2", "R3"],
-    "R2": ["R1", "R4"],
-    "R3": ["R1", "R5"],
-    "R4": ["R2", "R5"],
-    "R5": ["R3", "R4"]
-}
+DEFAULT_DATA_FILE = Path(__file__).resolve().parent / "data" / "router_networks.json"
+DEFAULT_VENV_PYTHON = Path(__file__).resolve().parent / ".venv" / "bin" / "python"
+REEXEC_ENV_VAR = "BFS_DFS_API_REEXEC"
 
 
-DISCONNECTED_NETWORK = {
-    "R1": ["R2"],
-    "R2": ["R1", "R3"],
-    "R3": ["R2"],
-    "R4": ["R5"],
-    "R5": ["R4"]
-}
+def build_parser():
+    parser = argparse.ArgumentParser(
+        description="Analisa a conectividade de uma rede de roteadores com DFS usando pilha."
+    )
+    parser.add_argument(
+        "--data-file",
+        default=str(DEFAULT_DATA_FILE),
+        help="Caminho para o arquivo JSON com os cenarios de rede.",
+    )
+    parser.add_argument(
+        "--scenario",
+        default=None,
+        help="Nome de um cenario especifico para executar. Sem isso, executa todos.",
+    )
+    parser.add_argument(
+        "--central-router",
+        default=None,
+        help="Sobrescreve o roteador central definido no arquivo.",
+    )
+    parser.add_argument(
+        "--plain",
+        action="store_true",
+        help="Desativa a interface animada e imprime uma saida simples.",
+    )
+    parser.add_argument(
+        "--step-delay",
+        type=float,
+        default=0.18,
+        help="Atraso entre os passos da animacao em segundos.",
+    )
+    parser.add_argument(
+        "--no-intro",
+        action="store_true",
+        help="Desativa a intro hacker antes da animacao principal.",
+    )
+    return parser
 
-
-def analyze_network(network, central_router, name):
-    visited = dfs_with_stack(network, central_router)
-    connected = is_network_connected(network, central_router)
-
-    print(name)
-    print(f"Roteador central: {central_router}")
-    print(f"Roteadores visitados: {sorted(visited)}")
-    print(f"Todos os roteadores foram visitados? {visited == set(network.keys())}")
-    print(f"Rede conectada? {connected}")
-    print()
 
 def main():
-    analyze_network(CONNECTED_NETWORK, "R1", "Caso 1 - Rede conectada")
-    analyze_network(DISCONNECTED_NETWORK, "R1", "Caso 2 - Rede desconectada")
+    parser = build_parser()
+    args = parser.parse_args()
+
+    if not args.plain and not RICH_AVAILABLE:
+        already_reexecuted = os.environ.get(REEXEC_ENV_VAR) == "1"
+        if DEFAULT_VENV_PYTHON.exists() and not already_reexecuted:
+            reexec_env = os.environ.copy()
+            reexec_env[REEXEC_ENV_VAR] = "1"
+            os.execve(
+                str(DEFAULT_VENV_PYTHON),
+                [str(DEFAULT_VENV_PYTHON), __file__, *sys.argv[1:]],
+                reexec_env,
+            )
+
+    scenarios = load_router_scenarios(args.data_file)
+
+    selected = scenarios
+    if args.scenario:
+        if args.scenario not in scenarios:
+            available = ", ".join(sorted(scenarios))
+            raise SystemExit(
+                f"Cenario '{args.scenario}' nao encontrado. Cenarios disponiveis: {available}"
+            )
+        selected = {args.scenario: scenarios[args.scenario]}
+
+    analyses = []
+    items = list(selected.items())
+
+    for name, scenario in items:
+        central_router = args.central_router or scenario["central_router"]
+        analysis = analyze_router_network(
+            scenario["network"],
+            central_router,
+            expected_connected=scenario.get("expected_connected"),
+            scenario_label=scenario.get("label", name),
+        )
+        analyses.append((scenario, analysis))
+
+    if args.plain:
+        for name, (_, analysis) in zip(selected.keys(), analyses):
+            print_plain_analysis(name, analysis)
+        return
+
+    if len(analyses) > 1:
+        if not args.no_intro:
+            render_hacker_intro(title="DFS ROUTER STACK :: 2 TESTES")
+
+        for scenario, analysis in analyses:
+            label = analysis["scenario_label"] or "Teste"
+            render_router_analysis(
+                label,
+                scenario["network"],
+                analysis,
+                step_delay=args.step_delay,
+                show_intro=False,
+            )
+
+        render_compact_results([analysis for _, analysis in analyses])
+        return
+
+    for scenario, analysis in analyses:
+        label = analysis["scenario_label"] or "Teste"
+        render_router_analysis(
+            label,
+            scenario["network"],
+            analysis,
+            step_delay=args.step_delay,
+            show_intro=not args.no_intro,
+        )
+
 
 if __name__ == "__main__":
     main()
