@@ -53,6 +53,11 @@ def build_parser():
         action="store_true",
         help="Desativa a intro hacker antes da animacao principal.",
     )
+    parser.add_argument(
+        "--apresentacao",
+        action="store_true",
+        help="Inicia o modo de apresentacao em slides antes da analise.",
+    )
     return parser
 
 
@@ -70,6 +75,12 @@ def main():
                 [str(DEFAULT_VENV_PYTHON), __file__, *sys.argv[1:]],
                 reexec_env,
             )
+
+    if args.apresentacao and RICH_AVAILABLE:
+        from src.services.slideshow import run_presentation
+        should_continue = run_presentation()
+        if not should_continue:
+            return
 
     scenarios = load_router_scenarios(args.data_file)
 
