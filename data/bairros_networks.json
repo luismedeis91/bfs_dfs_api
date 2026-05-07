@@ -1,0 +1,14 @@
+{
+  "bairros_network": {
+    "Centro": ["Benfica", "Aldeota", "Praia de Iracema"],
+    "Benfica": ["Centro", "Bairro de Fátima"],
+    "Aldeota": ["Centro", "Meireles", "Dionísio Torres", "Cocó"],
+    "Bairro de Fátima": ["Benfica", "Dionísio Torres"],
+    "Dionísio Torres": ["Aldeota", "Bairro de Fátima", "Cocó"],
+    "Meireles": ["Aldeota", "Praia de Iracema", "Varjota"],
+    "Praia de Iracema": ["Meireles", "Centro"],
+    "Cocó": ["Aldeota", "Dionísio Torres", "Papicu"],
+    "Papicu": ["Cocó", "Varjota"],
+    "Varjota": ["Meireles", "Papicu"]
+  }
+}

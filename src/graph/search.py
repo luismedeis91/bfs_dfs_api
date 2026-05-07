@@ -36,6 +36,27 @@ def dfs(graph, start, visited=None):
     return visited
 
 
+def dfs_find_path_recursive(graph, start, target, visited=None, path=None):
+    if visited is None:
+        visited = set()
+    if path is None:
+        path = []
+
+    visited.add(start)
+    path.append(start)
+
+    if start == target:
+        return path
+
+    for neighbor in graph.get(start, []):
+        if neighbor not in visited:
+            result_path = dfs_find_path_recursive(graph, neighbor, target, visited, list(path))
+            if result_path:
+                return result_path
+
+    return None
+
+
 def dfs_with_stack(graph, start):
     visited = set()
     stack = [start]
