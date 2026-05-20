@@ -120,24 +120,24 @@ def find_farthest_pair_bfs(graph):
 
     return farthest_pair
 
-def dijkstra(graph, start, target):
-    visited = set()
-    dist = []
-    previous = []
-
-    for _ in graph:
-        dist.append(float('inf'))
-        previous.append(None)
-
-    dist[start] = 0
-
-    while not contains(visited, target):
-        pass
-
-
-def least_valued_unexplored_vertice(graph, start):
-    visited = set()
-
-    for neighbor in graph.get(start, []):
-        pass
+# def dijkstra(graph, start, target):
+#     visited = set()
+#     dist = []
+#     previous = []
+#
+#     for _ in graph:
+#         dist.append(float('inf'))
+#         previous.append(None)
+#
+#     dist[start] = 0
+#
+#     while not contains(visited, target):
+#         pass
+#
+#
+# def least_valued_unexplored_vertice(graph, start):
+#     visited = set()
+#
+#     for neighbor in graph.get(start, []):
+#         pass
 

@@ -13,8 +13,8 @@ test_graph = {
 def dijkstra(graph, start, target):
     num_nodes = len(graph)
     visited = set()
-    dist = [float('inf')] * num_nodes
-    previous = [None] * num_nodes
+    dist = [] * num_nodes
+    previous = [] * num_nodes
 
     for i, (_, _) in enumerate(graph.items()):
         dist[i] = float('inf')
