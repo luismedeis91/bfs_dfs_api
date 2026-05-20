@@ -37,15 +37,41 @@ max_degree = degrees.max()
 def dijkstra(graph, start, target):
     num_nodes = len(graph)
     visited = set()
-    dist = [] * num_nodes
-    previous = [] * num_nodes
+    dist = {}
+    previous = {}
 
-    for i, (_, _) in enumerate(graph.items()):
-        dist[i] = float('inf')
-        previous[i] = None
+    for node in graph:
+        dist[node] = float('inf')
+        previous[node] = None
 
     dist[start] = 0
 
-    while not contains(visited, target):
-        pass
+    while len(visited) != len(graph):
+        current = None
+        menor_distancia = float('inf')
 
+        for node in graph:
+            if node not in visited and dist[node] < menor_distancia:
+                menor_distancia = dist[node]
+                current = node
+
+        if current is None:
+            break
+
+        visited.add(current)
+
+        for neighbor, weight in graph[current].items():
+            if neighbor not in visited:
+                nova_distancia = dist[current] + weight
+
+                if nova_distancia < dist[neighbor]:
+                    dist[neighbor] = nova_distancia
+                    previous[neighbor] = current
+
+    return dist, previous
+
+
+distancias, anteriores = dijkstra(test_graph, 'A')
+
+
+print(distancias)
