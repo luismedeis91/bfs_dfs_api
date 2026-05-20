@@ -50,7 +50,7 @@ def slide_intro():
         f"[bold {ACCENT}]Algoritmos de Busca em Grafos[/]\n\n"
         "Explorando a conectividade da rede de internet em Fortaleza\n"
         "usando Busca em Profundidade (DFS) Recursiva e Iterativa.\n\n"
-        "[italic muted]Um projeto focado em resiliência de malhas ópticas em áreas críticas.[/]"
+        "[italic muted]Uma solução focada em resiliência de malhas ópticas em áreas críticas.[/]"
     )
     return Panel(Align.center(content, vertical="middle"), title="[bold white]Apresentação[/]", border_style=ACCENT)
 
@@ -113,6 +113,19 @@ def slide_demo():
         "[bold warning]Pressione ENTER para carregar a Topologia...[/]"
     )
     return Panel(Align.center(content, vertical="middle"), title="[bold white]Execução do Algoritmo[/]", border_style=WARNING)
+
+def slide_final():
+    content = Text.from_markup(
+        "\n\n\n[italic white]\"O homem livre é um lutador e a liberdade é algo que se conquista.\"[/]\n"
+        f"[bold {MUTED}]- FRIEDRICH NIETZSCHE[/]\n\n\n"
+        f"[bold {ACCENT}]Obrigado pela atenção![/]\n\n"
+    )
+    return Panel(
+        Align.center(content, vertical="middle"), 
+        title="[bold white]Conclusão[/]", 
+        border_style=ACCENT,
+        padding=(1, 2)
+    )
 
 def get_char():
     fd = sys.stdin.fileno()

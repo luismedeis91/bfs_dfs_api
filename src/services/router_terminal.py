@@ -2,6 +2,8 @@ from collections import deque
 from random import choice, randint
 from time import sleep
 
+from .slideshow import get_char, slide_final
+
 
 try:
     from rich import box
@@ -709,3 +711,35 @@ def print_plain_analysis(name, analysis):
                 f"| risco {item['avg_risk']} | status {item['status']}"
             )
     print()
+
+
+def render_final_conclusion():
+    _require_rich()
+    console = Console()
+    console.print()
+    console.print(Rule(style=ACCENT))
+    console.print(Align.center(Text("ANÁLISE CONCLUÍDA", style=f"bold {SUCCESS}")))
+    console.print(Align.center(Text("Pressione ENTER para encerrar...", style=MUTED)))
+    
+    while True:
+        ch = get_char()
+        if ch in ['\r', '\n', ' ']:
+            break
+        if ch.lower() == 'q':
+            return
+
+    console.clear()
+    
+    # Renderiza o slide final diretamente no console limpo
+    console.print("\n" * (console.height // 3)) # Espaçamento para centralizar verticalmente
+    console.print(Align.center(slide_final()))
+    console.print("\n" * 2)
+    console.print(Align.center(Text("Pressione ENTER para encerrar", style=MUTED)))
+    
+    # Aguarda o usuário
+    while True:
+        ch = get_char()
+        if ch in ['\r', '\n', ' ']:
+            break
+    
+    console.clear()

@@ -8,6 +8,7 @@ from src.services.router_terminal import (
     RICH_AVAILABLE,
     print_plain_analysis,
     render_compact_results,
+    render_final_conclusion,
     render_hacker_intro,
     render_router_analysis,
 )
@@ -127,6 +128,9 @@ def main():
             )
 
         render_compact_results([analysis for _, analysis in analyses])
+        
+        if not args.plain and RICH_AVAILABLE:
+            render_final_conclusion()
         return
 
     for scenario, analysis in analyses:
@@ -138,6 +142,9 @@ def main():
             step_delay=args.step_delay,
             show_intro=not args.no_intro,
         )
+
+    if not args.plain and RICH_AVAILABLE:
+        render_final_conclusion()
 
 
 if __name__ == "__main__":
