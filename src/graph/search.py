@@ -132,10 +132,12 @@ def dijkstra(graph, start, target):
     dist[start] = 0
 
     while not contains(visited, target):
+        pass
 
 
 def least_valued_unexplored_vertice(graph, start):
     visited = set()
 
     for neighbor in graph.get(start, []):
+        pass
 
