@@ -34,7 +34,17 @@ degrees = adj_matrix.sum(axis=1)
 min_degree = degrees.min()
 max_degree = degrees.max()
 
-def dijkstra(graph, start, target):
+test_graph = {
+    'A': {'B': 2, 'C': 5},
+    'B': {'A': 2, 'C': 6, 'D': 1, 'E': 3},
+    'C': {'A': 5, 'B': 6, 'F': 8},
+    'D': {'B': 1, 'E': 4},
+    'E': {'B': 3, 'D': 4, 'G': 9},
+    'F': {'C': 8, 'G': 7},
+    'G': {'E': 9, 'F': 7}
+}
+
+def dijkstra(graph, start):
     num_nodes = len(graph)
     visited = set()
     dist = {}
@@ -73,5 +83,59 @@ def dijkstra(graph, start, target):
 
 distancias, anteriores = dijkstra(test_graph, 'A')
 
-
 print(distancias)
+print(anteriores)
+
+def dijkstra_mapa(graph, start, target):
+    num_nodes = len(graph)
+    visited = set()
+    dist = {}
+    previous = {}
+
+    for node in graph:
+        dist[node] = float('inf')
+        previous[node] = None
+
+    dist[start] = 0
+
+    while not contains(visited, target):
+        current = None
+        menor_distancia = float('inf')
+
+        for node in graph:
+            if node not in visited and dist[node] < menor_distancia:
+                menor_distancia = dist[node]
+                current = node
+
+        if current is None:
+            break
+
+        visited.add(current)
+
+        for neighbor, weight in graph[current].items():
+            if neighbor not in visited:
+                nova_distancia = dist[current] + weight
+
+                if nova_distancia < dist[neighbor]:
+                    dist[neighbor] = nova_distancia
+                    previous[neighbor] = current
+
+    path = []
+    current = previous.get(target)
+    path.append(target)
+    while current != start:
+        path.append(current)
+        current = previous.get(current)
+    path.append(start)
+
+    cost = 0
+    for node in path:
+        cost += dist[node]
+
+    return dist, previous, path, cost
+
+distancias, anteriores, path, cost = dijkstra_mapa(test_graph, 'A', 'D')
+print(distancias)
+print(anteriores)
+print(path)
+print(cost)
