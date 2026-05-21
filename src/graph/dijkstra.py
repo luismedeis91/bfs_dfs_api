@@ -128,9 +128,7 @@ def dijkstra_mapa(graph, start, target):
         current = previous.get(current)
     path.append(start)
 
-    cost = 0
-    for node in path:
-        cost += dist[node]
+    cost = dist.get(target)
 
     return dist, previous, path, cost
 
