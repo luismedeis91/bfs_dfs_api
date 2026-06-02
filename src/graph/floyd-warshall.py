@@ -20,7 +20,7 @@ def floyd_warshall(graph, start, target):
     inf = float('inf')
     n = len(graph)
     dist = graph.copy()
-    next = [[-1 if graph[i][j] == inf else j for j in range(n)] for i in range(n)]
+    next_matrix = [[-1 if graph[i][j] == inf else j for j in range(n)] for i in range(n)]
 
     for k in range(n):
         for i in range(n):
@@ -29,7 +29,7 @@ def floyd_warshall(graph, start, target):
                     caminho_com_intermediario = dist[i][k] + dist[k][j]
 
                     if caminho_com_intermediario < dist[i][j]:
-                        next[i][j] = next[i][k]
+                        next_matrix[i][j] = next_matrix[i][k]
 
                     dist[i][j] = min(dist[i][j], caminho_com_intermediario)
 
@@ -40,9 +40,23 @@ def floyd_warshall(graph, start, target):
     else:
         print(f"Custo total do caminho ligando o vértice {start} ao vértice {target} igual à: {custo}.")
 
+        caminho = [start]
+        atual = start
+        while atual != target:
+            atual = next_matrix[atual][target]
+            caminho.append(atual)
+
+        print("Caminho: ", end="")
+        for i in range(len(caminho)):
+            if i == len(caminho)-1:
+                print(f"{caminho[i]}")
+            else:
+                print(f"{caminho[i]} -> ", end="")
+
+    print()
     print("Matriz de distancias")
     print(dist)
     print("Matriz de anteriores")
-    print(np.array(next))
+    print(np.array(next_matrix))
 
-floyd_warshall(adj_matrix, 0, 4)
+floyd_warshall(adj_matrix, 1, 3)
